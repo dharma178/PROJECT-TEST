@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import statistics as stats
 import numpy as np
 from pandas.core.accessor import CachedAccessor
-import scipy.stats as sta
+import scipy.stats as st
 from scipy.stats.stats import tstd
 import statsmodels.stats.proportion as stm
 import statsmodels.stats.weightstats as stm
@@ -70,67 +70,72 @@ plt.show()
 #total cases in a day in NSW state
 
 #1: confidence interval
-#taking sample of total cases of 30 random days in NSW
-Covid_patient=[]
+#taking sample of total cases of 26 random days in NSW
 
 list_dates= ["13/04/2021","17/04/2021","22/04/2021","02/05/2021","10/05/2021","20/05/20212","29/05/2021"
-             ,"5/06/2021","5/07/2021","22/07/2021","25/07/2021","31/07/2021",
-             "5/08/2021","10/08/2021","15/08/2021","18/08/2021","19/08/2021" "22/08/2021",
-             "25/08/2021","5/09/2021","9/08/2021","31/08/2021","3/09/2021","8/09/2021","10/09/2021",
-             "17/09/2021","19/09/2021","21/09/2021" ,"25/09/2021" "26/09/2021"]
-df2= df.groupby(["NSW"]).sum()
-#print("\nThe table groupy NSW with total covid case",df2)
+             ,"5/06/2021","16/06/2021", "21/06/2021", "27/06/2021", "8/07/2021","16/07/2021","25/07/2021","31/07/2021",
+             "4/08/2021","10/08/2021","15/08/2021","18/08/2021","19/08/2021" "22/08/2021",
+             "25/08/2021","1/09/2021","9/09/2021","15/09/2021","26/09/2021"]
 
-#print ("datesss:", dates)
-for date in list_dates:
-    acs= ["Date"]==date
-    value_date= acs.loc[acs["NSW"]==date,"NSW"].sum()
-    Covid_patient.append(value_date)
-    print(Covid_patient)
-    Covid_patient= np.array(Covid_patient)
-    x_bar=sta.tmean(Covid_patient)
-    s=sta.tstd(Covid_patient)
-    n= len(Covid_patient)
-    print("\nmean",x_bar,"\ndeviation",s,"\nlength",n)
+#taking the number of cases of 26 random days in NSW
+sample2= np.array([5,7,7,3,6,2,1,0,3,7,32,38,98,234,360,417,634,684,830,921,1118,1471,1261,964])
+                  
+
+#compute the sample statistics
+print("computing the basic statistics ...")
+x_bar= st.tmean(sample2)
+s=st.tstd(sample2)
+n=len(sample2)
+print(x_bar, s , n)
+
+
+#z-score(assuming 95% confidence level)
+z_score =st.norm.ppf(q=0.975)
+print("z-statistic: %.2f" %z_score)
+
+#compute standard error
+std_err=s/math.sqrt(n)
+print("std_err: %.2f" %std_err)
+
+#compute the margin of error
+mrg_err=z_score * std_err
+print("mrg_err:%.2f"%mrg_err)
+
+
+#confidence level
+conf_lvl=0.95
     
-    #standard error
-    std_err= s/math.sqrt(n)
-    print("\nstandard error",std_err)
-    
-    
-    #confidence level
-    conf_lvl=0.95
-    
-    #also'alpha'
-    sig_1v1= 1-conf_lvl
-    
-    #calculating confidence interval of Total cases in a day in NSW
-    ci_low, ci_up = stm._zconfint_generic(x_bar, std_err,alpha=0.05,alternative="two-side")
-    print("The lower C.I is" , ci_low, "\nThe upper class C.I is",ci_up)
-    
-    #2 one sample -testing
-    
-    sample= Covid_patient
-    print("computing the basis statistics......" )
-    x_bar= sta.tmean(sample)
-    s= sta.tstd(sample)
-    print("\t sample mean: %.2f" % x_bar)
-    print("\t sample std. dev.: %.2f" % s)
-     
-     #perform one-sample t-test
-     #null hypothesis: population mean= 315
-     #alternative hypothesis: population mean>315 (in the funtion below,note the alternative hypothesis)
-    t_stats, p_val =sta.ttest_1samp(sample,315, alternative= "greater")
-    print("\n computing t* ...")
-    print ("\t t-statistic (t*): %.2f" % t_stats)
-    
-    print("\n computing p-value ...")
-    print("\t p-value.%.4f" % p_val)
-    
-    print("\n conclusion") 
-    if p_val< 0.05:
-        print("\t we reject the null hypothesis.")   
-    else:
-        print("\t we accept the null hypothesis")
+
+#also'alpha'
+sig_1v1= 1-conf_lvl
+
+#degree of freedom
+deg_free= 1-n
+
+
+#calculating confidence interval of Total cases in a day in NSW
+ci_low, ci_upp= stm._zconfint_generic(x_bar, std_err, alpha=0.05, alternative="two-sided")
+print("The lower C.I is" , ci_low, "\nThe upper class C.I is:", ci_upp)
+
+
+#perform one-sample t-test
+#null hypothesis: population mean=379.29
+#alternative hypothesis: population mean>379.29 (in the function below,note the argument 'greater')
+t_stats, p_val = st.ttest_1samp(sample2, 379.29, alternative='greater')
+print("\n computing t* ...")
+print("\t t-statistic (t*): %.2f" % t_stats)
+
+print("n computing p_valve ....")
+print("\t p-value: %.4f" % p_val)
+
+
+print("\n conclusion:")
+if p_val<0.05:
+    print ("\t we reject the null hypothesis.")
+else:
+    print("\t we accept the null hypothesis")
+
+
+
               
     
